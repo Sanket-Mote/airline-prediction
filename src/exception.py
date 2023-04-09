@@ -1,5 +1,5 @@
 import sys
-import logging
+from logger import logging
 
 def error_message_detail(error, error_detail:sys):
     _, _, exc_tb = error_detail.exc_info()
@@ -18,7 +18,7 @@ class CustomException(Exception):
     
     def __str__(self):
         return self.error_message
-    
+
 """ TESTING
 if __name__ == "__main__":
     try:
@@ -26,5 +26,4 @@ if __name__ == "__main__":
     except Exception as e:
         logging.info("Division by 0 error")
         CustomException(e, sys)
-
 """
