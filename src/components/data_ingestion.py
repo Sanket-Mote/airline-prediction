@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 import pyodbc
 
-from src.exception import CustomException
-from src.logger import logging
+from ..exception import CustomException 
+from ..logger import logging
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
@@ -64,7 +64,7 @@ class DataIngestion:
     def __init__(self):
         self.ingestion_config = DataIngestionConfig
 
-    df = FileValidation(INPUTFILE)
+    df = DataValidation.FileValidation(INPUTFILE)
     logging.info("Data validated and read successfully")
 
     def initiate_data_ingestion(self, data_validation):
