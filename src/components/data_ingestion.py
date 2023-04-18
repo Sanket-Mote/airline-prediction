@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 import pyodbc
 
-from src.exception import CustomException 
-from src.logger import logging
+from exception import CustomException 
+from logger import logging
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
@@ -20,22 +20,26 @@ class DataIngestionConfig:
 
 class DataValidation:
     try:
-        def FileValidation(self, dataset_path):
-            df = pd.read_csv("Dataset\Clean_Dataset.csv")
-            logging.info("Read the input file successfully")
+        def FileValidation(self, INPUTFILE):
+            df = pd.read_csv(INPUTFILE)
+            logging.info("Read the input file successfully {}".format(df.columns))
 
             agreed_columns = ['airline', 'flight', 'source_city', 'departure_time','stops', 
             'arrival_time', 'destination_city', 'class', 'duration', 'days_left', 'price']
 
+            if df.shape[1] == 12:
+                df.drop(['Unnamed: 0'], axis = 1, inplace = True)
+                logging.info("Dropped the Index column")
+
             if df.shape[1] == 11:
                 for i in df.columns:
                     if i in agreed_columns:
-                        logging.info("Columns validated, {1} columns are present and names are {2}".
-                        format(df.shape[1], list(df.columns)))
+                        logging.info("Columns validated, {} columns are present and names are {}".
+                        format(df.shape[1], tuple(df.columns)))
                     else:
                         logging.info("Data is not as per agreed terms, hence rejected")
             else:
-                logging.info("Data has {1} columns and not as per agreed terms".format(df.shape[1]))  
+                logging.info("Data has {} columns and not as per agreed terms".format(df.shape[1]))  
 
             #Updating data types
 
@@ -64,10 +68,7 @@ class DataIngestion:
     def __init__(self):
         self.ingestion_config = DataIngestionConfig
 
-    df = DataValidation.FileValidation(INPUTFILE)
-    logging.info("Data validated and read successfully")
-
-    def initiate_data_ingestion(self, data_validation):
+    def initiate_data_ingestion(self, df):
         logging.info("Entered the data ingestion method or component")
         try:
             conn=pyodbc.connect(Trusted_connection='yes',Driver='{ODBC Driver 17 for SQL Server}',
@@ -92,6 +93,14 @@ class DataIngestion:
                     row[9],
                     row[10]
                     )
+                
+            cursor.execute("IF EXISTS (SELECT * FROM SYSOBJECTS WHERE name='FLIGHT_STAGGING' and xtype='U') DROP TABLE Airline_Analysis.dbo.FLIGHT_STAGGING")
+
+            cursor.execute("select distinct airline, flight, source_city, departure_time, stops, arrival_time, destination_city, class, duration, days_left, price into Airline_Analysis.dbo.FLIGHT_STAGGING from Airline_Analysis.dbo.FLIGHT")
+
+            cursor.execute("truncate table Airline_Analysis.dbo.FLIGHT")
+
+            cursor.execute("insert into Airline_Analysis.dbo.FLIGHT select * from Airline_Analysis.dbo.FLIGHT_STAGGING")
 
             conn.commit()
 
@@ -102,21 +111,21 @@ class DataIngestion:
             cursor.execute('select top 10000* from [dbo].[FLIGHT]')  #AFTER COMPLETION FETCH COMPLETE DATA
             data_fetch = cursor.fetchall()
 
-            df_sql = pd.DataFrame(np.array(xc) , columns = ['airline', 'flight', 'source_city', 'departure_time', 
+            df_sql = pd.DataFrame(np.array(data_fetch) , columns = ['airline', 'flight', 'source_city', 'departure_time', 
                                                         'stops', 'arrival_time', 'destination_city', 'class', 
                                                         'duration', 'days_left', 'price'])
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok = True)
 
-            df_sql.to_csv(self.ingestion_config.raw_data_path, index = False, headers = True)
+            df_sql.to_csv(self.ingestion_config.raw_data_path, index = False, header = True)
 
             logging.info("Training and Testing dataset split initiated")
 
             train_set, test_set = train_test_split(df_sql, test_size = 0.2, random_state = 101)
 
-            train_set.to_csv(self.ingestion_config.train_data_path, index = False, headers = True)
+            train_set.to_csv(self.ingestion_config.train_data_path, index = False, header = True)
 
-            test_set.to_csv(self.ingestion_config.test_data_path, index = False, headers = True)
+            test_set.to_csv(self.ingestion_config.test_data_path, index = False, header = True)
 
             logging.info("Data Ingestion is completed")
 
@@ -131,7 +140,12 @@ class DataIngestion:
 
 if __name__=="__main__":
     obj=DataIngestion()
-    train_data,test_data=obj.initiate_data_ingestion()
+    cls = DataValidation()
+    df = cls.FileValidation(INPUTFILE)
+    logging.info("Data validated and read successfully")
+    train_data,test_data=obj.initiate_data_ingestion(df)
+    logging.info("Data inserted into database successfully")
+    
 
 
 
