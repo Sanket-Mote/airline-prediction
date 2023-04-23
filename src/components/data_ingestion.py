@@ -10,6 +10,9 @@ from logger import logging
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
+from components.data_transformation import DataTransformation
+from components.data_transformation import DataTransformationConfig
+
 INPUTFILE = 'Dataset\Clean_Dataset.csv'
 
 @dataclass
