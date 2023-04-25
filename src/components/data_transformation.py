@@ -119,7 +119,7 @@ class DataTransformation:
             input_feature_train_arr = preprocessing_obj.fit_transform(train_df_independent_features)
             input_feature_test_arr = preprocessing_obj.transform(test_df_independent_features)
 
-            """
+            
             train_arr = np.c_[
                 input_feature_train_arr, np.array(train_df_target_feature)
             ]
@@ -127,7 +127,7 @@ class DataTransformation:
             test_arr = np.c_[
                 input_feature_test_arr, np.array(test_df_target_feature)
             ]
-            """
+            
 
             logging.info("Transformed training dataset")
             logging.info("Transformed testing dataset")
