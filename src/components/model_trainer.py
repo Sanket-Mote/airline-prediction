@@ -17,7 +17,7 @@ from xgboost import XGBRegressor
 
 from sklearn.metrics import (
     mean_absolute_error, 
-    mean_squared_error, .
+    mean_squared_error,
     r2_score
 )
 
@@ -52,9 +52,9 @@ class ModelTrainer:
                     "Decision Tree" : DecisionTreeRegressor(),
                     "Gradient Boosting" : GradientBoostingRegressor(),
                     "Linear Regression" : LinearRegression(),
-                    "XGBRegressor" : XGBRegressor(),
+                    "XGBRegressor" : XGBRegressor(),                            #Best
                     "Catboost Regressor" : CatBoostRegressor(verbose = False),
-                    "Adaboost Regressor" : AdaBoostRegressor()
+                    "Adaboost Regressor" : AdaBoostRegressor()                  #Tested
                 }
 
                 params = {

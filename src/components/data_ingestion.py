@@ -27,14 +27,14 @@ class DataValidation:
             df = pd.read_csv(INPUTFILE)
             logging.info("Read the input file successfully {}".format(df.columns))
 
-            agreed_columns = ['airline', 'flight', 'source_city', 'departure_time','stops', 
+            agreed_columns = ['airline', 'source_city', 'departure_time','stops', 
             'arrival_time', 'destination_city', 'class', 'duration', 'days_left', 'price']
 
             if df.shape[1] == 12:
-                df.drop(['Unnamed: 0'], axis = 1, inplace = True)
-                logging.info("Dropped the Index column")
+                df.drop(['Unnamed: 0', 'flight'], axis = 1, inplace = True)
+                logging.info("Dropped the Index and flight number column")
 
-            if df.shape[1] == 11:
+            if df.shape[1] == 10:
                 for i in df.columns:
                     if i in agreed_columns:
                         logging.info("Columns validated, {} columns are present and names are {}".
@@ -47,7 +47,6 @@ class DataValidation:
             #Updating data types
 
             df['airline'] = df['airline'].astype('object')
-            df['flight'] = df['flight'].astype('object')
             df['source_city'] = df['source_city'].astype('object')
             df['departure_time'] = df['departure_time'].astype('object')
             df['stops'] = df['stops'].astype('object')
